@@ -1,3 +1,6 @@
+.. image:: https://github.com/AmeyaVS/pyverilator/actions/workflows/test-verilator-dev.yml/badge.svg
+.. image:: https://coveralls.io/repos/github/AmeyaVS/pyverilator/badge.svg?branch=master
+
 PyVerilator
 ===========
 
