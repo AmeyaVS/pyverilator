@@ -2,4 +2,4 @@ flake8
 coverage
 pytest
 pytest-cov
--i https://github.com/AmeyaVS/tclwrapper
+tclwrapper @ git+https://github.com/AmeyaVS/tclwrapper@master
