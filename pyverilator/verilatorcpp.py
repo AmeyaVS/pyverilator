@@ -4,7 +4,7 @@ def header_cpp(top_module):
 #include "verilated_vcd_c.h"
 #include "{module_filename}.h"
 // TODO: Fix This Header Include for internal signals.
-#include "{module_filename}___024root.h"
+//#include "{module_filename}___024root.h"
     """.format(module_filename='V' + top_module)
     return s
 

@@ -435,8 +435,7 @@ class PyVerilator:
                             '--trace',
                             '--cc',
                             '--debug',
-                            '--gdbbt',
-                            '--debugi', '3',
+
                             top_verilog_file,
                             '--exe',
                             verilator_cpp_wrapper_path]
@@ -448,6 +447,7 @@ class PyVerilator:
         internal_signals = []
         verilator_h_file = os.path.join(build_dir, 'V' + verilog_module_name + '.h')
 
+        verilator_h_file_root = None
         regex = re.compile(f'V{verilog_module_name}___' + r'(.*root.h$)')
         for root, dirs, files in os.walk(build_dir):
             for file in files:
@@ -489,12 +489,13 @@ class PyVerilator:
                 if result:
                     internal_signals.append(result)
 
-        with(open(verilator_h_file_root)) as f:
-            for line in f:
-            # Get Intermediates signals/registers
-                result = search_for_signal_decl('DOT', line)
-                if result:
-                    internal_signals.append(result)
+        if verilator_h_file_root != None:
+            with(open(verilator_h_file_root)) as f:
+                for line in f:
+                # Get Intermediates signals/registers
+                    result = search_for_signal_decl('DOT', line)
+                    if result:
+                        internal_signals.append(result)
 
         # generate the C++ wrapper file
         verilator_cpp_wrapper_code = template_cpp.template_cpp(verilog_module_name, inputs, outputs, internal_signals,
