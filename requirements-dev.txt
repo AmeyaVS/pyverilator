@@ -1,0 +1,6 @@
+flake8
+black
+coverage
+pytest
+pytest-cov
+-i https://github.com/AmeyaVS/tclwrapper
