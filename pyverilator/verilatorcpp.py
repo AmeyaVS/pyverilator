@@ -3,6 +3,8 @@ def header_cpp(top_module):
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 #include "{module_filename}.h"
+// TODO: Fix This Header Include for internal signals.
+#include "{module_filename}___024root.h"
     """.format(module_filename='V' + top_module)
     return s
 
@@ -46,6 +48,7 @@ double main_time = 0;
 // What to call when $finish is called
 typedef void (*vl_finish_callback)(const char* filename, int line, const char* hier);
 vl_finish_callback vl_user_finish = NULL;
+VerilatedContext *ctx = nullptr;
     """.format(
         top_module = top_module,
         nb_inputs=len(inputs),
@@ -70,12 +73,12 @@ void vl_finish (const char* filename, int linenum, const char* hier) VL_MT_UNSAF
     }} else {{
         // Default implementation
         VL_PRINTF("- %s:%d: Verilog $finish\\n", filename, linenum);  // Not VL_PRINTF_MT, already on main thread
-        if (Verilated::gotFinish()) {{
+        if (ctx->gotFinish()) {{
             VL_PRINTF("- %s:%d: Second verilog $finish, exiting\\n", filename, linenum);  // Not VL_PRINTF_MT, already on main thread
-            Verilated::flushCall();
+            //ctx->flushCall();
             exit(0);
         }}
-        Verilated::gotFinish(true);
+        ctx->gotFinish(true);
     }}
 }}
 // function definitions
@@ -83,7 +86,7 @@ void vl_finish (const char* filename, int linenum, const char* hier) VL_MT_UNSAF
 extern "C" {{ //Open an extern C closed in the footer
 {module_filename}* construct() {{
     Verilated::traceEverOn(true);
-    {module_filename}* top = new {module_filename}();
+    {module_filename}* top = new {module_filename}(ctx);
     return top;
 }}
 int eval({module_filename}* top) {{
@@ -94,7 +97,9 @@ int eval({module_filename}* top) {{
 int destruct({module_filename}* top) {{
     if (top != nullptr) {{
         delete top;
+        delete ctx;
         top = nullptr;
+        ctx = nullptr;
     }}
     return 0;
 }}
@@ -117,16 +122,17 @@ int stop_vcd_trace(VerilatedVcdC* tfp) {{
     return 0;
 }}
 bool get_finished() {{
-    return Verilated::gotFinish();
+    return ctx->gotFinish();
 }}
 void set_finished(bool b) {{
-    Verilated::gotFinish(b);
+    ctx->gotFinish(b);
 }}
 void set_vl_finish_callback(vl_finish_callback callback) {{
     vl_user_finish = callback;
 }}
 void set_command_args(int argc, char** argv) {{
     Verilated::commandArgs(argc, argv);
+    ctx = new VerilatedContext();
 }}
 """.format(module_filename='V' + top_module)
     get_functions = "\n".join(map(lambda port: (
@@ -136,7 +142,16 @@ void set_command_args(int argc, char** argv) {{
             "{{return top->{portname};}}" if port[1] > 32 else
             "uint32_t get_{portname}({module_filename}* top)"
             "{{return top->{portname};}}")).format(module_filename='V' + top_module, portname=port[0]),
-                                  outputs + inputs + internal_signals))
+                                  outputs + inputs))
+    get_functions += "\n"
+    get_functions += "\n".join(map(lambda port: (
+            "uint32_t get_{portname}({module_filename}* top, int word)"
+            "{{ return top->rootp->{portname}[word];}}" if port[1] > 64 else (
+                "uint64_t get_{portname}({module_filename}* top)"
+                "{{return top->rootp->{portname};}}" if port[1] > 32 else
+                "uint32_t get_{portname}({module_filename}* top)"
+                "{{return top->rootp->{portname};}}")).format(module_filename='V' + top_module, portname=port[0]),
+                    internal_signals))
     set_functions = "\n".join(map(lambda port: (
         "int set_{portname}({module_filename}* top, int word, uint64_t new_value)"
         "{{ top->{portname}[word] = new_value; return 0;}}" if port[1] > 64 else (

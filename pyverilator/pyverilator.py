@@ -412,7 +412,7 @@ class PyVerilator:
         # prepare the path for the C++ wrapper file
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)
-        verilator_cpp_wrapper_path = os.path.join(build_dir, 'pyverilator_wrapper.cpp')
+        verilator_cpp_wrapper_path = os.path.join(build_dir, f'pyverilator_wrapper_{verilog_module_name}.cpp')
 
         # call verilator executable to generate the verilator C++ files
         verilog_path_args = []
@@ -431,9 +431,12 @@ class PyVerilator:
                          + verilog_path_args \
                          + verilog_defines \
                          + ['-CFLAGS',
-                           '-fPIC -shared --std=c++11 -DVL_USER_FINISH',
+                           '-fPIC -shared -std=c++14 -DVL_USER_FINISH -O0 -ggdb3',
                             '--trace',
                             '--cc',
+                            '--debug',
+                            '--gdbbt',
+                            '--debugi', '3',
                             top_verilog_file,
                             '--exe',
                             verilator_cpp_wrapper_path]
@@ -445,17 +448,26 @@ class PyVerilator:
         internal_signals = []
         verilator_h_file = os.path.join(build_dir, 'V' + verilog_module_name + '.h')
 
+        regex = re.compile(f'V{verilog_module_name}___' + r'(.*root.h$)')
+        for root, dirs, files in os.walk(build_dir):
+            for file in files:
+                if regex.match(file):
+                    verilator_h_file_root = os.path.join(build_dir, file)
+
+
         def search_for_signal_decl(signal_type, line):
             # looks for VL_IN*, VL_OUT*, or VL_SIG* macros
-            result = re.search('(VL_' + signal_type + r'[^(]*)\(([^,]+),([0-9]+),([0-9]+)(?:,[0-9]+)?\);', line)
+            if signal_type in ('IN', 'OUT', 'SIG'):
+                result = re.search('(VL_' + signal_type + r'[^(]*)\(&?([^,]+),([0-9]+),([0-9]+)(?:,[0-9]+)?\);', line)
+            else:
+                result = re.search(r'/\*(\d+):(\d+)\*/' + f' ({verilog_module_name})__{signal_type}__' + r'([\w]+);', line)
             if result:
                 signal_name = result.group(2)
-                if signal_type == 'SIG':
-                    if signal_name.startswith(verilog_module_name) and '[' not in signal_name and int(
-                            result.group(4)) == 0:
-                        # this is an internal signal
-                        signal_width = int(result.group(3)) - int(result.group(4)) + 1
-                        return (signal_name, signal_width)
+                if signal_type == 'DOT':
+                    signal_name = result.group(4)
+                    if (result.group(3).startswith(verilog_module_name)):
+                        signal_width = int(result.group(1)) - int(result.group(2)) + 1
+                        return (f"{result.group(3)}__{signal_type}__{result.group(4)}", signal_width)
                     else:
                         return None
                 else:
@@ -474,6 +486,13 @@ class PyVerilator:
                 if result:
                     outputs.append(result)
                 result = search_for_signal_decl('SIG', line)
+                if result:
+                    internal_signals.append(result)
+
+        with(open(verilator_h_file_root)) as f:
+            for line in f:
+            # Get Intermediates signals/registers
+                result = search_for_signal_decl('DOT', line)
                 if result:
                     internal_signals.append(result)
 
@@ -507,11 +526,13 @@ class PyVerilator:
         self.curr_time = 0
         self.vcd_reader = None
         self.gtkwave_active = False
-        self.lib = ctypes.CDLL(so_file)
+        self.lib = ctypes.CDLL(os.path.realpath(so_file))
         self._lib_vl_finish_callback = None
         self.set_command_args(command_args)
         construct = self.lib.construct
         construct.restype = ctypes.c_void_p
+        get_finished = self.lib.get_finished
+        get_finished.restype = ctypes.c_bool
         self.model = construct()
         # get inputs, outputs, internal_signals, and json_data
         self._read_embedded_data()
@@ -811,6 +832,14 @@ class PyVerilator:
             self.send_signal_to_gtkwave(objs)
         else:
             objs.send_to_gtkwave()
+
+    def send_signals_to_gtkwave(self, sig):
+        if not self.gtkwave_active:
+            raise ValueError('send_signals_to_gtkwave() requires GTKWave to be started using start_gtkwave()')
+
+        for s in sig:
+            # print(s)
+            self.send_signal_to_gtkwave(sig[s])
 
     def send_signal_to_gtkwave(self, sig):
         if not self.gtkwave_active:
