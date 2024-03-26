@@ -691,7 +691,7 @@ class TestPyVerilator(unittest.TestCase):
         self.assertEqual(sim_1.finished, True)
         self.assertEqual(sim_2.finished, True)
 
-    @unittest.skipIf(shutil.which('verilator') is None or True, "test requires verilator to be in the path")
+    @unittest.skipIf(shutil.which('verilator') is None, "test requires verilator to be in the path")
     def test_pyverilator_command_args(self):
         finish_tester_verilog = '''
             module command_args_tester(

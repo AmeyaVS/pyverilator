@@ -75,6 +75,7 @@ void vl_finish (const char* filename, int linenum, const char* hier) VL_MT_UNSAF
         VL_PRINTF("- %s:%d: Verilog $finish\\n", filename, linenum);  // Not VL_PRINTF_MT, already on main thread
         if (ctx->gotFinish()) {{
             VL_PRINTF("- %s:%d: Second verilog $finish, exiting\\n", filename, linenum);  // Not VL_PRINTF_MT, already on main thread
+            Verilated::flushCall();
             //ctx->flushCall();
             exit(0);
         }}
@@ -133,6 +134,7 @@ void set_vl_finish_callback(vl_finish_callback callback) {{
 void set_command_args(int argc, char** argv) {{
     Verilated::commandArgs(argc, argv);
     ctx = new VerilatedContext();
+    ctx->commandArgs(argc, argv);
 }}
 """.format(module_filename='V' + top_module)
     get_functions = "\n".join(map(lambda port: (
