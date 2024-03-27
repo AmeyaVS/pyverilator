@@ -1,6 +1,12 @@
 name: TestVerilatorDev
 
-on: [push]
+on:
+  push:
+    branches:
+    - master
+  # Schedule Build Every Day
+  schedule:
+  - cron: "30 5 * * *"
 
 jobs:
   build:
