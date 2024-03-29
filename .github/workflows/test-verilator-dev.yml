@@ -66,7 +66,7 @@ jobs:
     - name: test
       run: |
         cd ./pyverilator/tests
-        pytest --cov --cov-report=lcov
+        pytest --cov --cov-report=lcov -n auto
     - name: Coveralls GitHub Action
       # You may pin to the exact commit or the version.
       # uses: coverallsapp/github-action@3dfc5567390f6fa9267c0ee9c251e4c8c3f18949
