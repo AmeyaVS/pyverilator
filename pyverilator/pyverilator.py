@@ -434,8 +434,6 @@ class PyVerilator:
                            '-fPIC -shared -std=c++14 -DVL_USER_FINISH -O0 -ggdb3',
                             '--trace',
                             '--cc',
-                            '--debug',
-
                             top_verilog_file,
                             '--exe',
                             verilator_cpp_wrapper_path]
