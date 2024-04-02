@@ -31,7 +31,7 @@ jobs:
         # sudo apt-get install zlibc zlib1g zlib1g-dev  # Ubuntu only (ignore if gives error)
     - name: Install verilator from github
       run: |
-        git clone https://github.com/verilator/verilator
+        git clone https://github.com/verilator/verilator --depth=1
 
         # Every time you need to build:
         # unsetenv VERILATOR_ROOT  # For csh; ignore error if on bash
