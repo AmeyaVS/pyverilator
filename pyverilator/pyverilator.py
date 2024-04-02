@@ -203,7 +203,7 @@ class Collection:
     def __repr__(self):
         num_items = len(self._item_dict_keys)
         if num_items == 0:
-            return "<empty {} object>".format(self.__class__.__name__)
+            return f"<empty {self.__class__.__name__} object>"
         truncated = num_items > 25
         if truncated:
             keys_to_show = [self._item_dict_keys[i] for i in range(10)]
@@ -218,7 +218,7 @@ class Collection:
         column_three = []
         for item in items_to_show:
             if isinstance(item, Collection):
-                column_three.append("{} items".format(len(item._item_dict_keys)))
+                column_three.append(f"{len(item._item_dict_keys)} items")
             elif isinstance(item, str):
                 column_three.append(f'"{item}"')
             else:
@@ -1000,7 +1000,7 @@ class PyVerilator:
                 "send_signal_to_gtkwave() only works on Signal objects. Use send_to_gtkwave() for other items."
             )
 
-        gtkwave_name = "TOP.{}.".format(self.module_name) + ".".join(sig.modular_name)
+        gtkwave_name = f"TOP.{self.module_name}." + ".".join(sig.modular_name)
         if sig.width > 1:
             gtkwave_name += f"[{(sig.width - 1)}:0]"
 

@@ -947,3 +947,11 @@ class TestPyVerilator(unittest.TestCase):
             self.assertEqual(sim.io[var + "_out"], 1)
             sim.io[var] = 0
             self.assertEqual(sim.io[var + "_out"], 0)
+
+    def test_verilator_tools(self):
+        """test verilator tools"""
+        pyverilator.verilator_tools.test_verilator_tools()
+
+
+if __name__ == "__main__":
+    unittest.main()

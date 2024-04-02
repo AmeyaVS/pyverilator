@@ -43,7 +43,7 @@ Assume you have the following verilog module stored in ``counter.v``.
             if (rst == 1) count_reg <= 0;
             else          count_reg <= next_count_reg;
         end
-    endmodule'''
+    endmodule
 
 Then you can use ``pyverilator`` to simulate this module using verilator in
 python.

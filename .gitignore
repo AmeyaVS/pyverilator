@@ -2,3 +2,7 @@
 __pycache__/
 examples/build
 .*
+*.gz
+venv/
+examples/obj_dir
+.vscode/

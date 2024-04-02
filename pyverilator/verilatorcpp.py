@@ -128,6 +128,7 @@ int destruct({module_filename}* top) {{
 }}
 DUMP_TYPE* start_vcd_trace({module_filename}* top, const char* filename) {{
     DUMP_TYPE* tfp = new DUMP_TYPE;
+    //or this one top->trace(tfp, DUMP_LEVEL);
     top->trace(tfp, 99);
     tfp->open(filename);
     return tfp;
