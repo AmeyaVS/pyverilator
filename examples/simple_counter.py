@@ -1,17 +1,21 @@
 import pyverilator
-sim = pyverilator.PyVerilator.build('counter.v')
 
-# start gtkwave to view the waveforms as they are made
-sim.start_gtkwave()
+sim = pyverilator.PyVerilator.build("counter.v")
+
+trace_en=False
+logs = True
+if trace_en:
+    # start gtkwave to view the waveforms as they are made
+    sim.start_gtkwave()
 
 # add all the io and internal signals to gtkwave
-#sim.send_signals_to_gtkwave(sim.io)
-#sim.send_signals_to_gtkwave(sim.internals)
+# sim.send_signals_to_gtkwave(sim.io)
+# sim.send_signals_to_gtkwave(sim.internals)
 
-# add all the io and internal signals to gtkwave
-sim.send_to_gtkwave(sim.io)
-sim.send_to_gtkwave(sim.internals)
-
+if trace_en:
+    # add all the io and internal signals to gtkwave
+    sim.send_to_gtkwave(sim.io)
+    sim.send_to_gtkwave(sim.internals)
 # tick the automatically detected clock
 sim.clock.tick()
 
@@ -27,47 +31,55 @@ curr_out = sim.io.out
 # features like being able to add it to gtkwave with
 # sim.io.out.send_to_gtkwave(). To just get the int value, you can call
 # sim.io.out.value
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
 # check out when en = 1
 sim.io.en = 1
 curr_out = sim.io.out
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
 sim.clock.tick()
 
 # check out after ticking clock
 curr_out = sim.io.out
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
 sim.clock.tick()
 
 # check out after ticking clock
 curr_out = sim.io.out
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
 sim.io.rst = 1
 curr_out = sim.io.out
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
 sim.clock.tick()
 
 # check out after ticking clock
 curr_out = sim.io.out
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
 sim.clock.tick()
 
 # check out after ticking clock
 sim.io.rst = 0
 curr_out = sim.io.out
-print('sim.io.out = ' + str(curr_out))
+if logs:
+    print("sim.io.out = " + str(curr_out))
 
-for count  in range(0, 260):
+for count in range(0, 260):
     sim.clock.tick()
-    
-    # check out after ticking clock
-    curr_out = sim.io.out
-    print('sim.io.out = ' + str(curr_out))
 
-sim.stop_gtkwave()
+    if logs:
+        # check out after ticking clock
+        curr_out = sim.io.out
+        print('sim.io.out = ' + str(curr_out))
+
+# sim.stop_gtkwave()
