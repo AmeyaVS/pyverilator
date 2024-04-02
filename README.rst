@@ -27,7 +27,7 @@ Usage
 
 Assume you have the following verilog module stored in ``counter.v``.
 
-.. code:: verilog
+.. code:: Verilog
 
     module counter (
             input        clk,

@@ -4,3 +4,4 @@ pytest
 pytest-cov
 tclwrapper @ git+https://github.com/AmeyaVS/tclwrapper@master
 pytest-xdist
+packaging

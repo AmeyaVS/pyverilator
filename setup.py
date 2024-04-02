@@ -30,7 +30,7 @@ setup(
     keywords="Verilator Wrapper Verilog",
     packages=find_packages(exclude=["examples"]),
     include_package_data=True,
-    install_requires=["tclwrapper>=0.0.1"],
+    install_requires=["tclwrapper>=0.0.1", "packaging"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
     entry_points={
