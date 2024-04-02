@@ -135,7 +135,7 @@ commands = ['tick_clock()',
             'tick_clock()',
             'tick_clock()']
 
-print('Press enter to simulate entering a command (there are %d commands in this demo)' % len(commands))
+print(f'Press enter to simulate entering a command (there are {len(commands)} commands in this demo)')
 for c in commands:
     # wait for enter
     input()
