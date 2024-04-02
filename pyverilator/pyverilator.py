@@ -296,7 +296,7 @@ class Signal:
 
     def __repr__(self):
         short_name = self.modular_name[-1]
-        return "{} = {}".format(short_name, self.status)
+        return f"{short_name} = {self.status}"
 
 
 class SignalValue(int):
@@ -414,6 +414,7 @@ class PyVerilator:
     def build(
         cls,
         top_verilog_file,
+        preceding_files="",
         verilog_path=[],
         build_dir="obj_dir",
         json_data=None,
@@ -421,6 +422,11 @@ class PyVerilator:
         quiet=False,
         command_args=(),
         verilog_defines=(),
+        args=[],
+        cargs="",
+        dump_en=True,
+        dump_fst=False,
+        dump_level=0,
     ):
         """Build an object file from verilog and load it into python.
 
@@ -444,6 +450,8 @@ class PyVerilator:
         ``command_args`` is passed to Verilator as its argv.  It can be used to pass arguments to the $test$plusargs and $value$plusargs system tasks.
 
         ``verilog_defines`` is a list of preprocessor defines; each entry should be a string, and defined macros with value should be specified as "MACRO=value".
+
+        ``args`` list of arguments passed to verilator commandline.
 
         If compilation fails, this function raises a ``subprocess.CalledProcessError``.
         """
@@ -480,28 +488,38 @@ class PyVerilator:
         if which_verilator is None:
             raise Exception("'verilator' executable not found")
         verilog_defines = ["+define+" + x for x in verilog_defines]
+        cflags = "-fPIC -shared -std=c++14 -DVL_USER_FINISH -O0 -ggdb3 " + cargs
         # tracing (--trace) is required in order to see internal signals
+
+        if dump_en:
+            cflags += f" -DDUMP_LEVEL={dump_level}"
+            if dump_fst:
+                cflags += " -DDUMP_FST"
         verilator_args = (
             ["perl", which_verilator, "-Wno-fatal", "-Mdir", build_dir]
             + verilog_path_args
             + verilog_defines
             + [
                 "-CFLAGS",
-                "-fPIC -shared -std=c++14 -DVL_USER_FINISH -O0 -ggdb3",
+                cflags,
                 "--trace",
                 "--cc",
+                preceding_files,
                 top_verilog_file,
                 "--exe",
                 verilator_cpp_wrapper_path,
             ]
         )
+
+        if dump_en and dump_fst:
+            verilator_args += ["--trace-fst"]
         call_process(verilator_args)
 
         # get inputs, outputs, and internal signals by parsing the generated verilator output
         inputs = []
         outputs = []
         internal_signals = []
-        verilator_h_file = os.path.join(build_dir, "V" + verilog_module_name + ".h")
+        verilator_h_file = os.path.join(build_dir, f"V{verilog_module_name}.h")
 
         verilator_h_file_root = None
         regex = re.compile(f"V{verilog_module_name}___" + r"(.*root.h$)")
@@ -573,7 +591,7 @@ class PyVerilator:
             internal_signals,
             json.dumps(json.dumps(json_data)),
         )
-        with open(verilator_cpp_wrapper_path, "w") as f:
+        with open(verilator_cpp_wrapper_path, "w", encoding="utf-8") as f:
             f.write(verilator_cpp_wrapper_code)
 
         # if only generating verilator C++ files, stop here
@@ -606,6 +624,7 @@ class PyVerilator:
         self.curr_time = 0
         self.vcd_reader = None
         self.gtkwave_active = False
+        self.gtkwave_tcl = None
         self.lib = ctypes.CDLL(os.path.realpath(so_file))
         self._lib_vl_finish_callback = None
         self.set_command_args(command_args)
@@ -827,6 +846,7 @@ class PyVerilator:
 
     @property
     def finished(self):
+        # self.stop_vcd_trace()
         return self.lib.get_finished()
 
     @finished.setter

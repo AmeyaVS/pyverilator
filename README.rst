@@ -17,6 +17,10 @@ using the following command:
 
     $ pip3 install pyverilator
 
+Installing Development Version
+-------------------------------
+
+    pip3 install git+https://github.com/AmeyaVS/pyverilator.git@master
 
 Usage
 -----
