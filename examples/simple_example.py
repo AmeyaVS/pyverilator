@@ -27,20 +27,22 @@ with open("counter.v", "w") as f:
     f.write(test_verilog)
 
 
-dump_fst = True
+dump_fst = False
 if dump_fst:
-    dump_filename = "dump.fst"
+    dump_filename = "gtkwave.fst"
 else:
-    dump_filename = "dump.vcd"
+    dump_filename = "gtkwave.vcd"
 sim = pyverilator.PyVerilator.build("counter.v", dump_fst=dump_fst, dump_level=1)
 
 # start gtkwave to view the waveforms as they are made
 # sim.start_gtkwave() # moved at the bottom... updating gtkwave during simulation is slow
 sim.start_vcd_trace(dump_filename)
+if not dump_fst:
+    sim.start_gtkwave()
 
-# add all the io and internal signals to gtkwave
-# sim.send_to_gtkwave(sim.io)
-# sim.send_to_gtkwave(sim.internals)
+    # add all the io and internal signals to gtkwave
+    sim.send_to_gtkwave(sim.io)
+    sim.send_to_gtkwave(sim.internals)
 
 # set the rst input to 1
 sim.io.rst = 1

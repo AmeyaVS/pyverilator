@@ -27,7 +27,7 @@ Usage
 
 Assume you have the following verilog module stored in ``counter.v``.
 
-.. code:: Verilog
+.. code:: verilog
 
     module counter (
             input        clk,
@@ -54,10 +54,6 @@ python.
 
     # start gtkwave to view the waveforms as they are made
     sim.start_gtkwave()
-
-    # add all the io and internal signals to gtkwave
-    sim.send_signals_to_gtkwave(sim.io)
-    sim.send_signals_to_gtkwave(sim.internals)
 
     # add all the io and internal signals to gtkwave
     sim.send_to_gtkwave(sim.io)

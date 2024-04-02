@@ -2,15 +2,12 @@ import pyverilator
 
 sim = pyverilator.PyVerilator.build("counter.v")
 
-trace_en=False
+trace_en = False
 logs = True
 if trace_en:
     # start gtkwave to view the waveforms as they are made
     sim.start_gtkwave()
 
-# add all the io and internal signals to gtkwave
-# sim.send_signals_to_gtkwave(sim.io)
-# sim.send_signals_to_gtkwave(sim.internals)
 
 if trace_en:
     # add all the io and internal signals to gtkwave
@@ -80,6 +77,6 @@ for count in range(0, 260):
     if logs:
         # check out after ticking clock
         curr_out = sim.io.out
-        print('sim.io.out = ' + str(curr_out))
+        print("sim.io.out = " + str(curr_out))
 
 # sim.stop_gtkwave()

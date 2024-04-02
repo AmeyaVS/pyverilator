@@ -466,7 +466,7 @@ class PyVerilator:
         verilog_module_name, extension = os.path.splitext(top_verilog_file_base)
         if extension not in [".v", ".sv"]:
             raise ValueError(
-                "PyVerilator() expects top_verilog_file to be a verilog file ending in .v"
+                "PyVerilator() expects top_verilog_file to be a verilog file ending in .v or .sv"
             )
 
         # prepare the path for the C++ wrapper file
@@ -978,16 +978,6 @@ class PyVerilator:
             self.send_signal_to_gtkwave(objs)
         else:
             objs.send_to_gtkwave()
-
-    def send_signals_to_gtkwave(self, sig):
-        if not self.gtkwave_active:
-            raise ValueError(
-                "send_signals_to_gtkwave() requires GTKWave to be started using start_gtkwave()"
-            )
-
-        for s in sig:
-            # print(s)
-            self.send_signal_to_gtkwave(sig[s])
 
     def send_signal_to_gtkwave(self, sig):
         if not self.gtkwave_active:

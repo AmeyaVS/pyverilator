@@ -215,10 +215,10 @@ void set_command_args(int argc, char** argv) {{
         )
     )
     footer = "}"
-    if not verilator_flushcall_ok():
-        constant_part = constant_part.replace(
-            "Verilated::flushCall();", "Verilated::runFlushCallbacks();"
-        )
+    # if not verilator_flushcall_ok():
+    #     constant_part = constant_part.replace(
+    #         "Verilated::flushCall();", "Verilated::runFlushCallbacks();"
+    #     )
     return "\n".join([constant_part, get_functions, set_functions, footer])
 
 
