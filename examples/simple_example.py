@@ -66,4 +66,4 @@ curr_out = sim.io.out.value
 print("sim.io.out = " + str(curr_out))
 
 sim.stop_vcd_trace()
-sim.start_gtkwave()  # moved at the bottom works both with fst and vcd
+# sim.start_gtkwave()  # moved at the bottom works both with fst and vcd
